@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth.models import User
-from django.contrib import messages
+from django.contrib import messages, auth
 from django.contrib.messages import constants
 # Create your views here.
 
@@ -30,3 +30,20 @@ def cadastro(request):
         user.save()
         messages.add_message(request, constants.SUCCESS, 'Usuario salvo com sucesso')
         return redirect(reverse('login'))
+
+
+def login(request):
+    if request.method == "GET":
+        return render(request, 'login.html')
+    elif request.method == "POST":
+        username = request.POST.get('username')
+        senha = request.POST.get('senha')
+
+        user = auth.authenticate(username=username, password=senha)
+
+        if not user:
+            messages.add_message(request, constants.ERROR, 'Username ou senha inválidos')
+            return redirect(reverse('login'))
+
+        auth.login(request, user)
+        return redirect('/eventos/novo_evento/')
